@@ -2,8 +2,13 @@ import React, { useEffect, useReducer } from 'react'
 // import data from '../data';
 import '../App.css';
 import axios from "axios"
-import { Link } from 'react-router-dom';
 import logger from "use-reducer-logger"
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+import Product from '../Component/Product';
+import { Helmet } from 'react-helmet-async';
+import LoadingBox from '../Component/LoadingBox';
+import MessageBox from '../Component/MessageBox';
 
 
 const reducer = (state, action) => {
@@ -42,30 +47,26 @@ const HomeScreen = () => {
     }, [])
     return (
         <>
+        <Helmet>
+            <title>AIOS</title>
+        </Helmet>
             <h1>Fearured products</h1>
             <div className="products">
                 {loading ? (
-                    <div> loading...</div>
+                    <LoadingBox />
                 ) : error ? (
-                    <div>{error}</div>
+                    <MessageBox variant="danger">{error}</MessageBox>
                 ) : (
-                    products.map(product => (
-                        <div className="product" key={product.slug}>
-                            <Link to={`/product/${product.slug}`}>
-                                <img src={product.image} alt={product.name} />
-                            </Link>
-                            <div className="product-info">
-                                <Link to={`/product/${product.slug}`}>
-                                    <p>{product.name}</p>
-                                </Link>
-                                <p>
-                                    <strong>${product.price}</strong>
-                                </p>
-                                <button>Add to cart</button>
-                            </div>
-                        </div>))
+                    <Row>
+                     { products.map(product => (
+                        <Col key={product.slug}>
+                       <Product product = {product}></Product>
+                        </Col>
+                        ))}
+                   </Row>
                 )
                 }
+               
             </div>
         </>
     )
