@@ -1,6 +1,6 @@
 import axios from 'axios';
-import React, { useEffect, useReducer } from 'react'
-import { useParams } from 'react-router-dom'
+import React, { useContext, useEffect, useReducer } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
@@ -12,8 +12,11 @@ import { Helmet } from 'react-helmet-async';
 import LoadingBox from '../Component/LoadingBox';
 import MessageBox from '../Component/MessageBox';
 import { getError } from '../utils';
+import { Store } from '../Store';
+
 
 const reducer = (state, action) => {
+    // const navigate = useNavigate()
     switch (action.type) {
         case 'FETCH_REQUEST':
             return { ...state, loading: true };
@@ -27,6 +30,7 @@ const reducer = (state, action) => {
 }
 
 const ProductScreen = () => {
+    const navigate = useNavigate()
     const params = useParams();
     const { slug } = params;
     const [{ loading, error, product }, dispatch] = useReducer(reducer, {
@@ -49,6 +53,22 @@ const ProductScreen = () => {
         };
         fetchData()
     }, [slug])
+
+const {state,dispatch: ctxDispatch} = useContext(Store)
+const {cart} = state;
+const addToCartHandler = async ()=>{
+const existItem = cart.cartItems.find((x)=> x._id === product._id)
+const quantity = existItem ? existItem.quantity +1 : 1;
+const {data} = await axios.get(`/api/products/${product._id}`)
+if(data.countInStock < quantity){
+    window.alert("sorry. product is out of stock");
+    return;
+}
+    ctxDispatch({type:"CART_ADD_ITEM",
+        payload:{...product,quantity},
+    });
+    navigate('/cart')
+}
 
     return (
         loading ? <LoadingBox />
@@ -123,7 +143,7 @@ const ProductScreen = () => {
                                             {product.countInStock > 0 && (
                                                 <ListGroup.Item>
                                                     <div className='d-grid'>
-                                                        <Button variant="primary">Add To Cart</Button>
+                                                        <Button onClick={addToCartHandler} variant="primary">Add To Cart</Button>
                                                     </div>
                                                 </ListGroup.Item>
                                             )}
