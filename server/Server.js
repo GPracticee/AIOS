@@ -4,10 +4,8 @@ import mongoose from "mongoose";
 import dotenv from "dotenv"
 import seedRouter from "./routes/SeedRoutes.js";
 import productRouter from "./routes/ProductRout.js";
-// import cors from "cors";
-// import bodyParser from "body-parser";
-// import pkg from "body-parser";
-// const { urlencoded } = pkg;
+import userRouter from "./routes/userRout.js";
+
 
 dotenv.config()
 mongoose.connect(process.env.MONGODB_URL).then(()=>{
@@ -17,21 +15,19 @@ mongoose.connect(process.env.MONGODB_URL).then(()=>{
 })
 
 const app = express()
+app.use(express.json())
+app.use(express.urlencoded({extended:true}))
+
 app.use('/api/seed',seedRouter)
 app.use('/api/products',productRouter)
-app.use(express.json())
+app.use('/api/users',userRouter)
 
 
 
-// app.use(cors());
-// app.use(bodyParser,urlencoded({extended:true}));
-// app.use((req,res,next)=>{
-//     res.setHeader("Access-Control-Allow-Origin","*")
-//     res.setHeader("Access-Control-Allow-Method","GET,POST,PUT,DELETE,OPTIONS")
-//     res.setHeader("Access-Control-Allow-Headers","Content-Type")
-//     res.setHeader("Access-Control-Allow-Credentials","true")
-//     next();
-// })
+//middleware
+app.use((err,req,res,next)=>{
+    res.status(500).send({message:err.message})
+})
 
 const port = process.env.PORT || 8001
 app.listen(port,()=>{
